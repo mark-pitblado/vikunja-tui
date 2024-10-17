@@ -12,4 +12,5 @@ ratatui = "0.28.1"
 crossterm = "0.22"
 dotenv = "0.15"
 html2text = "0.3"
+ansi-parser = "0.9"
 
