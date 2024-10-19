@@ -1,6 +1,6 @@
 use crate::api::{create_new_task, fetch_task_detail, fetch_tasks};
 use crate::models::{Task, TaskDetail};
-use crossterm::event::{self, Event as CEvent, KeyCode};
+use crossterm::event::KeyCode;
 use ratatui::widgets::ListState;
 use std::io;
 
