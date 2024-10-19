@@ -3,7 +3,6 @@ use crate::models::{Task, TaskDetail};
 use crossterm::event::{self, Event as CEvent, KeyCode};
 use ratatui::widgets::ListState;
 use std::io;
-use std::time::Duration;
 
 pub struct App {
     pub tasks: Vec<Task>,
