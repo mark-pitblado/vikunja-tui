@@ -6,9 +6,3 @@ This is a simple terminal user interface for [vikunja](https://vikunja.io). The 
 
 - View current tasks, with the ability to get details for any given task
 - Add tasks (title only)
-
-
-
-
-
-

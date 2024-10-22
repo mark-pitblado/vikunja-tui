@@ -1,10 +1,7 @@
-// ui.rs
-
 use crate::app::{App, InputMode};
 use crate::models::{Label, Task};
 use ansi_parser::{AnsiParser, Output};
 use crossterm::event::{self, Event as CEvent, KeyCode};
-use html2text::from_read;
 use ratatui::{
     backend::Backend,
     layout::{Alignment, Constraint, Direction, Layout, Rect},
@@ -50,11 +47,9 @@ pub fn ansi_to_text(ansi_str: &str) -> Vec<Line<'static>> {
         for item in parsed {
             match item {
                 Output::TextBlock(text) => {
-                    spans.push(Span::raw(text.to_string())); // Own the data
+                    spans.push(Span::raw(text.to_string()));
                 }
-                Output::Escape(_escape) => {
-                    // Handle styling here if needed
-                }
+                Output::Escape(_escape) => {}
             }
         }
         lines.push(Line::from(spans));
@@ -113,7 +108,6 @@ pub async fn run_app<B: Backend>(
 
             match app.input_mode {
                 InputMode::Normal => {
-                    // Use body_chunk instead of size
                     let chunks = Layout::default()
                         .direction(Direction::Horizontal)
                         .constraints(
@@ -188,7 +182,6 @@ pub async fn run_app<B: Backend>(
                                 let mut label_spans: Vec<Span<'static>> = Vec::new();
                                 for (i, label) in labels.iter().enumerate() {
                                     if i > 0 {
-                                        // Add a space between labels
                                         label_spans.push(Span::raw(" ".to_string()));
                                     }
                                     label_spans.push(Span::styled(
@@ -213,11 +206,9 @@ pub async fn run_app<B: Backend>(
                             if desc.trim() == "<p></p>" {
                                 lines.push(Line::from(Span::raw("No description".to_string())));
                             } else {
-                                // Convert HTML to ANSI-formatted text
                                 let width = (chunks[1].width - 2) as usize; // Adjust for borders
                                 let ansi_text = html2text::from_read(desc.as_bytes(), width);
 
-                                // Convert ANSI text to Lines with owned data
                                 let mut desc_lines = ansi_to_text(&ansi_text);
                                 lines.append(&mut desc_lines);
                             }
@@ -237,7 +228,6 @@ pub async fn run_app<B: Backend>(
                     }
                 }
                 InputMode::Editing => {
-                    // Render the popover input box centered in the body_chunk
                     let popup_area = centered_rect(60, 10, body_chunk);
 
                     let popup_block = Block::default()
@@ -249,7 +239,7 @@ pub async fn run_app<B: Backend>(
                         .style(Style::default().fg(Color::White))
                         .block(popup_block);
 
-                    f.render_widget(Clear, popup_area); // Clear the area first
+                    f.render_widget(Clear, popup_area);
                     f.render_widget(input, popup_area);
                 }
             }
