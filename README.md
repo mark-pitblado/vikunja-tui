@@ -6,7 +6,7 @@ This is a simple terminal user interface for [vikunja](https://vikunja.io). The 
 
 Place the following two values in a `.toml` file within your configuration files under the `vikunja-tui` directory. The instance url should not contain `api/v1`, just the base url for your instance. The api key just needs read and write access to tasks.
 
-`~/.config/vikunja-tui/config.toml
+`~/.config/vikunja-tui/config.toml`
 
 ```toml
 ['vikunja']
