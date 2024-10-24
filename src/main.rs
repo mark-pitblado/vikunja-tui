@@ -8,42 +8,62 @@ use crossterm::{
     execute,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
-use dotenv::dotenv;
+use dirs::config_dir;
 use ratatui::{backend::CrosstermBackend, Terminal};
-use std::env;
+use serde::Deserialize;
+use std::fs;
 use std::io;
+use std::path::PathBuf;
 use ui::run_app;
+
+#[derive(Deserialize)]
+struct VikunjaConfig {
+    instance_url: String,
+    api_key: String,
+}
+
+#[derive(Deserialize)]
+struct Config {
+    vikunja: VikunjaConfig,
+}
+
+fn load_config() -> Result<Config, Box<dyn std::error::Error>> {
+    let mut config_path: PathBuf = config_dir().expect("Could not determine config directory");
+    config_path.push("vikunja-tui/config.toml");
+
+    // Read the config file
+    let config_content = fs::read_to_string(config_path)?;
+
+    // Parse the TOML content
+    let config: Config = toml::from_str(&config_content)?;
+
+    Ok(config)
+}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // Load environment variables from .env file
-    dotenv().ok();
+    let config = load_config().expect("Failed to load config file");
 
-    // Read API key and instance URL from environment variables
-    let instance_url = env::var("INSTANCE_URL").expect("INSTANCE_URL not set");
-    let api_key = env::var("API_KEY").expect("API_KEY not set");
+    let instance_url = config.vikunja.instance_url;
+    let api_key = config.vikunja.api_key;
 
-    // Fetch all tasks from the API
     let all_tasks = api::fetch_tasks(&instance_url, &api_key).await?;
 
-    // Filter out completed tasks
     let incomplete_tasks: Vec<models::Task> =
         all_tasks.into_iter().filter(|task| !task.done).collect();
 
-    // Setup terminal UI
     enable_raw_mode()?;
     let mut stdout = io::stdout();
     execute!(stdout, EnterAlternateScreen)?;
     let backend = CrosstermBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
 
-    terminal.hide_cursor()?; // Hide the cursor
+    terminal.hide_cursor()?;
 
-    let app = App::new(incomplete_tasks); // Initialize app with incomplete tasks
+    let app = App::new(incomplete_tasks);
 
     let res = run_app(&mut terminal, app, &instance_url, &api_key).await;
 
-    // Restore terminal
     disable_raw_mode()?;
     execute!(terminal.backend_mut(), LeaveAlternateScreen)?;
     terminal.show_cursor()?;
