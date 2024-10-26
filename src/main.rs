@@ -3,6 +3,8 @@ mod app;
 mod models;
 mod ui;
 
+use crate::api::fetch_tasks;
+
 use app::App;
 use crossterm::{
     execute,
@@ -47,8 +49,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let instance_url = config.vikunja.instance_url;
     let api_key = config.vikunja.api_key;
 
-    let all_tasks = api::fetch_tasks(&instance_url, &api_key, 1).await?;
-    let tasks_for_app = all_tasks.clone();
+    let show_done_tasks = false;
+
+    let tasks = fetch_tasks(&instance_url, &api_key, 1).await?;
+    let tasks = if show_done_tasks {
+        tasks
+    } else {
+        tasks.into_iter().filter(|task| !task.done).collect()
+    };
 
     enable_raw_mode()?;
     let mut stdout = io::stdout();
@@ -58,7 +66,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     terminal.hide_cursor()?;
 
-    let app = App::new(tasks_for_app);
+    let mut app = App::new(tasks);
 
     let res = run_app(&mut terminal, app, &instance_url, &api_key).await;
 
