@@ -66,7 +66,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     terminal.hide_cursor()?;
 
-    let mut app = App::new(tasks);
+    let app = App::new(tasks);
 
     let res = run_app(&mut terminal, app, &instance_url, &api_key).await;
 

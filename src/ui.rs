@@ -1,7 +1,6 @@
 use crate::app::{App, InputMode};
-use crate::models::{Label, Task};
 use ansi_parser::{AnsiParser, Output};
-use crossterm::event::{self, Event as CEvent, KeyCode};
+use crossterm::event::{self, Event as CEvent};
 use ratatui::{
     backend::Backend,
     layout::{Alignment, Constraint, Direction, Layout, Rect},
