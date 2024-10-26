@@ -124,7 +124,20 @@ pub async fn run_app<B: Backend>(
                         let tasks: Vec<ListItem> = app
                             .tasks
                             .iter()
-                            .map(|task| ListItem::new(Line::from(task.title.clone())))
+                            .map(|task| {
+                                // Check if the task is done
+                                let content = if task.done {
+                                    // Prepend "DONE" for completed tasks
+                                    vec![
+                                        Span::styled("DONE ", Style::default().fg(Color::Green)),
+                                        Span::raw(&task.title),
+                                    ]
+                                } else {
+                                    vec![Span::raw(&task.title)]
+                                };
+
+                                ListItem::new(Line::from(content))
+                            })
                             .collect();
 
                         List::new(tasks)
@@ -136,7 +149,7 @@ pub async fn run_app<B: Backend>(
                             )
                             .highlight_symbol(">> ")
                     } else {
-                        List::new(vec![ListItem::new("No incomplete tasks available")])
+                        List::new(vec![ListItem::new("No tasks available")])
                             .block(Block::default().borders(Borders::ALL).title("Tasks"))
                     };
 

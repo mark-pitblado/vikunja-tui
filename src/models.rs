@@ -1,7 +1,7 @@
 use serde::Deserialize;
 
 // Task struct
-#[derive(Deserialize, Debug)]
+#[derive(Clone, Deserialize, Debug)]
 pub struct Task {
     pub id: u64,
     pub title: String,

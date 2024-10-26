@@ -48,9 +48,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let api_key = config.vikunja.api_key;
 
     let all_tasks = api::fetch_tasks(&instance_url, &api_key, 1).await?;
-
-    let incomplete_tasks: Vec<models::Task> =
-        all_tasks.into_iter().filter(|task| !task.done).collect();
+    let tasks_for_app = all_tasks.clone();
 
     enable_raw_mode()?;
     let mut stdout = io::stdout();
@@ -60,7 +58,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     terminal.hide_cursor()?;
 
-    let app = App::new(incomplete_tasks);
+    let app = App::new(tasks_for_app);
 
     let res = run_app(&mut terminal, app, &instance_url, &api_key).await;
 
