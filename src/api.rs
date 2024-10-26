@@ -2,12 +2,13 @@ use crate::models::{Label, Task, TaskDetail};
 use reqwest::Client;
 use std::collections::HashMap;
 
-pub async fn fetch_tasks(instance_url: &str, api_key: &str) -> Result<Vec<Task>, reqwest::Error> {
+pub async fn fetch_tasks(
+    instance_url: &str,
+    api_key: &str,
+    page: usize,
+) -> Result<Vec<Task>, reqwest::Error> {
     let client = Client::new();
-    let url = format!(
-        "{}/api/v1/tasks/all?project=Inbox&sort_by=created",
-        instance_url
-    );
+    let url = format!("{}/api/v1/tasks/all?page={}", instance_url, page);
 
     let res = client
         .get(&url)

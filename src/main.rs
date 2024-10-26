@@ -47,7 +47,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let instance_url = config.vikunja.instance_url;
     let api_key = config.vikunja.api_key;
 
-    let all_tasks = api::fetch_tasks(&instance_url, &api_key).await?;
+    let all_tasks = api::fetch_tasks(&instance_url, &api_key, 1).await?;
 
     let incomplete_tasks: Vec<models::Task> =
         all_tasks.into_iter().filter(|task| !task.done).collect();

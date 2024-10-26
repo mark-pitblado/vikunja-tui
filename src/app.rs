@@ -10,6 +10,7 @@ pub struct App {
     pub task_detail: Option<TaskDetail>,
     pub input_mode: InputMode,
     pub new_task_title: String,
+    pub page: usize,
 }
 
 pub enum InputMode {
@@ -31,6 +32,17 @@ impl App {
             task_detail: None,
             input_mode: InputMode::Normal,
             new_task_title: String::new(),
+            page: 1,
+        }
+    }
+
+    pub fn next_page(&mut self) {
+        self.page += 1;
+    }
+
+    pub fn previous_page(&mut self) {
+        if self.page > 1 {
+            self.page -= 1;
         }
     }
 
@@ -86,6 +98,22 @@ impl App {
                 KeyCode::Char('q') => return Ok(true),
                 KeyCode::Char('j') => self.next(),
                 KeyCode::Char('k') => self.previous(),
+                KeyCode::Char('n') => {
+                    // Next page
+                    self.next_page();
+                    if let Ok(new_tasks) = fetch_tasks(instance_url, api_key, self.page).await {
+                        self.tasks = new_tasks.into_iter().filter(|task| !task.done).collect();
+                        self.state.select(Some(0));
+                    }
+                }
+                KeyCode::Char('p') => {
+                    // Previous page
+                    self.previous_page();
+                    if let Ok(new_tasks) = fetch_tasks(instance_url, api_key, self.page).await {
+                        self.tasks = new_tasks.into_iter().filter(|task| !task.done).collect();
+                        self.state.select(Some(0));
+                    }
+                }
                 KeyCode::Char('a') => {
                     self.input_mode = InputMode::Editing;
                     self.new_task_title.clear();
@@ -108,7 +136,9 @@ impl App {
                                 eprintln!("Error creating task: {}", err);
                             } else {
                                 // Refresh the task list
-                                if let Ok(all_tasks) = fetch_tasks(instance_url, api_key).await {
+                                if let Ok(all_tasks) =
+                                    fetch_tasks(instance_url, api_key, self.page).await
+                                {
                                     self.tasks =
                                         all_tasks.into_iter().filter(|task| !task.done).collect();
                                     self.state.select(Some(0));
