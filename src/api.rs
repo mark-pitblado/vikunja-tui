@@ -1,6 +1,7 @@
 use crate::models::{Task, TaskDetail};
 use reqwest::Client;
-use std::collections::HashMap;
+use serde_json::json;
+use std::error::Error;
 
 pub async fn fetch_tasks(
     instance_url: &str,
@@ -48,17 +49,23 @@ pub async fn create_new_task(
     instance_url: &str,
     api_key: &str,
     task_title: &str,
-) -> Result<(), Box<dyn std::error::Error>> {
+    priority: Option<u8>,
+) -> Result<(), Box<dyn Error>> {
     let client = Client::new();
     let url = format!("{}/api/v1/projects/1/tasks", instance_url);
 
-    let mut map = HashMap::new();
-    map.insert("title", task_title);
+    let mut task_data = json!({
+        "title": task_title
+    });
+
+    if let Some(priority_value) = priority {
+        task_data["priority"] = json!(priority_value);
+    }
 
     let res = client
         .put(&url)
         .header("Authorization", format!("Bearer {}", api_key))
-        .json(&map)
+        .json(&task_data)
         .send()
         .await?;
 
