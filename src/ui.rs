@@ -99,13 +99,7 @@ pub async fn run_app<B: Backend>(
             let chunks = Layout::default()
                 .direction(Direction::Vertical)
                 .margin(0)
-                .constraints(
-                    [
-                        Constraint::Min(0),    // Body takes up the remaining space
-                        Constraint::Length(2), // Footer is 3 rows high
-                    ]
-                    .as_ref(),
-                )
+                .constraints([Constraint::Min(0), Constraint::Length(2)].as_ref())
                 .split(size);
 
             let body_chunk = chunks[0];
@@ -116,7 +110,7 @@ pub async fn run_app<B: Backend>(
                     let chunks = Layout::default()
                         .direction(Direction::Horizontal)
                         .constraints(
-                            [Constraint::Percentage(50), Constraint::Percentage(50)].as_ref(),
+                            [Constraint::Percentage(65), Constraint::Percentage(35)].as_ref(),
                         )
                         .split(body_chunk);
 
