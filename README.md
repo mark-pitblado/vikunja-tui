@@ -1,5 +1,7 @@
 # vikunja-tui
 
+[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-%23FE5196?logo=conventionalcommits&logoColor=white)](https://conventionalcommits.org)
+
 This is a simple terminal user interface for [vikunja](https://vikunja.io). The purpose is to allow users to manage tasks from the terminal, using their own API key. This project is not managed or affiliated with the Vikunja team.
 
 ## Setup

@@ -11,6 +11,7 @@ pub struct App {
     pub input_mode: InputMode,
     pub new_task_title: String,
     pub page: usize,
+    pub show_done_tasks: bool,
 }
 
 pub enum InputMode {
@@ -33,7 +34,23 @@ impl App {
             input_mode: InputMode::Normal,
             new_task_title: String::new(),
             page: 1,
+            show_done_tasks: false,
         }
+    }
+
+    pub async fn refresh_tasks(
+        &mut self,
+        instance_url: &str,
+        api_key: &str,
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        let new_tasks = fetch_tasks(instance_url, api_key, self.page).await?;
+        if self.show_done_tasks {
+            self.tasks = new_tasks;
+        } else {
+            self.tasks = new_tasks.into_iter().filter(|task| !task.done).collect();
+        }
+        self.state.select(Some(0));
+        Ok(())
     }
 
     pub fn next_page(&mut self) {
@@ -101,17 +118,21 @@ impl App {
                 KeyCode::Char('n') => {
                     // Next page
                     self.next_page();
-                    if let Ok(new_tasks) = fetch_tasks(instance_url, api_key, self.page).await {
-                        self.tasks = new_tasks.into_iter().filter(|task| !task.done).collect();
-                        self.state.select(Some(0));
+                    if let Err(err) = self.refresh_tasks(instance_url, api_key).await {
+                        eprintln!("Error fetching tasks: {}", err);
                     }
                 }
                 KeyCode::Char('p') => {
                     // Previous page
                     self.previous_page();
-                    if let Ok(new_tasks) = fetch_tasks(instance_url, api_key, self.page).await {
-                        self.tasks = new_tasks.into_iter().filter(|task| !task.done).collect();
-                        self.state.select(Some(0));
+                    if let Err(err) = self.refresh_tasks(instance_url, api_key).await {
+                        eprintln!("Error fetching tasks: {}", err);
+                    }
+                }
+                KeyCode::Char('t') => {
+                    self.show_done_tasks = !self.show_done_tasks;
+                    if let Err(err) = self.refresh_tasks(instance_url, api_key).await {
+                        eprintln!("Error fetching tasks: {}", err);
                     }
                 }
                 KeyCode::Char('a') => {

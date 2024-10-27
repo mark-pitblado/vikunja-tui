@@ -1,4 +1,4 @@
-use crate::models::{Label, Task, TaskDetail};
+use crate::models::{Task, TaskDetail};
 use reqwest::Client;
 use std::collections::HashMap;
 

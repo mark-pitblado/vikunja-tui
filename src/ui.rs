@@ -1,7 +1,6 @@
 use crate::app::{App, InputMode};
-use crate::models::{Label, Task};
 use ansi_parser::{AnsiParser, Output};
-use crossterm::event::{self, Event as CEvent, KeyCode};
+use crossterm::event::{self, Event as CEvent};
 use ratatui::{
     backend::Backend,
     layout::{Alignment, Constraint, Direction, Layout, Rect},
@@ -70,6 +69,8 @@ fn get_legend(input_mode: &InputMode) -> Text<'static> {
             Span::raw(": Next Page "),
             Span::styled(" p ", Style::default().fg(Color::Red)),
             Span::raw(": Previous Page "),
+            Span::styled(" t ", Style::default().fg(Color::Red)),
+            Span::raw(": Toggle Done "),
             Span::styled(" Enter ", Style::default().fg(Color::Red)),
             Span::raw(": View Details "),
             Span::styled(" a ", Style::default().fg(Color::Red)),
@@ -119,16 +120,32 @@ pub async fn run_app<B: Backend>(
                         )
                         .split(body_chunk);
 
+                    let task_title = if app.show_done_tasks {
+                        "Tasks (All)"
+                    } else {
+                        "Tasks (Undone)"
+                    };
+
                     // Left panel: Task list
                     let tasks_widget = if !app.tasks.is_empty() {
                         let tasks: Vec<ListItem> = app
                             .tasks
                             .iter()
-                            .map(|task| ListItem::new(Line::from(task.title.clone())))
+                            .map(|task| {
+                                let content = if task.done {
+                                    vec![
+                                        Span::styled("DONE ", Style::default().fg(Color::Green)),
+                                        Span::raw(&task.title),
+                                    ]
+                                } else {
+                                    vec![Span::raw(&task.title)]
+                                };
+                                ListItem::new(Line::from(content))
+                            })
                             .collect();
 
                         List::new(tasks)
-                            .block(Block::default().borders(Borders::ALL).title("Tasks"))
+                            .block(Block::default().borders(Borders::ALL).title(task_title))
                             .highlight_style(
                                 Style::default()
                                     .fg(Color::Green)
@@ -136,8 +153,8 @@ pub async fn run_app<B: Backend>(
                             )
                             .highlight_symbol(">> ")
                     } else {
-                        List::new(vec![ListItem::new("No incomplete tasks available")])
-                            .block(Block::default().borders(Borders::ALL).title("Tasks"))
+                        List::new(vec![ListItem::new("No tasks available")])
+                            .block(Block::default().borders(Borders::ALL).title(task_title))
                     };
 
                     f.render_stateful_widget(tasks_widget, chunks[0], &mut app.state);
