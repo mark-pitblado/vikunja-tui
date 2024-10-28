@@ -1,6 +1,7 @@
 mod api;
 mod app;
 mod models;
+mod parser;
 mod ui;
 
 use crate::api::fetch_tasks;

@@ -1,5 +1,6 @@
 use crate::api::{create_new_task, fetch_task_detail, fetch_tasks};
 use crate::models::{Task, TaskDetail};
+use crate::parser::parse_task_input;
 use crossterm::event::KeyCode;
 use ratatui::widgets::ListState;
 use std::io;
@@ -149,10 +150,18 @@ impl App {
             InputMode::Editing => {
                 match key.code {
                     KeyCode::Enter => {
-                        // Handle task submission
                         if !self.new_task_title.trim().is_empty() {
-                            if let Err(err) =
-                                create_new_task(instance_url, api_key, &self.new_task_title).await
+                            // Use the parser to extract the task title, priority, and label titles
+                            let parsed_task = parse_task_input(&self.new_task_title);
+
+                            // Create the new task with the parsed title, priority, and labels
+                            if let Err(err) = create_new_task(
+                                instance_url,
+                                api_key,
+                                &parsed_task.title,
+                                parsed_task.priority,
+                            )
+                            .await
                             {
                                 eprintln!("Error creating task: {}", err);
                             } else {

@@ -19,4 +19,14 @@ api_key = "<your-key-here>"
 ## Current Features
 
 - View current tasks, with the ability to get details for any given task
-- Add tasks (title only)
+- Toggle between showing complete tasks and incomplete tasks (shows incomplete by default)
+- Pagination of tasks.
+- Add tasks
+	- Title
+	- Priority, via ![1-5] (vikunja quick add magic syntax)
+
+## Roadmap
+
+- [ ] Parse labels via `*label`
+- [ ] Edit existing tasks
+
