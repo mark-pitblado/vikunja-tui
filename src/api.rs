@@ -49,6 +49,7 @@ pub async fn create_new_task(
     instance_url: &str,
     api_key: &str,
     task_title: &str,
+    description: Option<&str>,
     priority: Option<u8>,
 ) -> Result<(), Box<dyn Error>> {
     let client = Client::new();
@@ -57,6 +58,10 @@ pub async fn create_new_task(
     let mut task_data = json!({
         "title": task_title
     });
+
+    if let Some(desc) = description {
+        task_data["description"] = json!(desc);
+    }
 
     if let Some(priority_value) = priority {
         task_data["priority"] = json!(priority_value);

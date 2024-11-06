@@ -151,14 +151,13 @@ impl App {
                 match key.code {
                     KeyCode::Enter => {
                         if !self.new_task_title.trim().is_empty() {
-                            // Use the parser to extract the task title, priority, and label titles
                             let parsed_task = parse_task_input(&self.new_task_title);
 
-                            // Create the new task with the parsed title, priority, and labels
                             if let Err(err) = create_new_task(
                                 instance_url,
                                 api_key,
                                 &parsed_task.title,
+                                parsed_task.description.as_deref(),
                                 parsed_task.priority,
                             )
                             .await
