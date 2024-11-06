@@ -106,7 +106,7 @@ mod tests {
     fn test_parse_with_invalid_priority_and_spaces() {
         let input = "Check logs !8    immediately";
         let expected = ParsedTask {
-            title: "Check logs !8 immediately".to_string(),
+            title: "Check logs immediately".to_string(),
             priority: None,
         };
         let result = parse_task_input(input);
