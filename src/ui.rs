@@ -12,14 +12,14 @@ use ratatui::{
 use std::io;
 use std::time::Duration;
 
-fn centered_rect(percent_x: u16, percent_y: u16, r: Rect) -> Rect {
+fn centered_rect_absolute(width: u16, height: u16, r: Rect) -> Rect {
     let popup_layout = Layout::default()
         .direction(Direction::Vertical)
         .constraints(
             [
-                Constraint::Percentage((100 - percent_y) / 2),
-                Constraint::Percentage(percent_y),
-                Constraint::Percentage((100 - percent_y) / 2),
+                Constraint::Length((r.height.saturating_sub(height)) / 2),
+                Constraint::Length(height),
+                Constraint::Length((r.height.saturating_sub(height) + 1) / 2),
             ]
             .as_ref(),
         )
@@ -29,9 +29,9 @@ fn centered_rect(percent_x: u16, percent_y: u16, r: Rect) -> Rect {
         .direction(Direction::Horizontal)
         .constraints(
             [
-                Constraint::Percentage((100 - percent_x) / 2),
-                Constraint::Percentage(percent_x),
-                Constraint::Percentage((100 - percent_x) / 2),
+                Constraint::Length((r.width.saturating_sub(width)) / 2),
+                Constraint::Length(width),
+                Constraint::Length((r.width.saturating_sub(width) + 1) / 2),
             ]
             .as_ref(),
         )
@@ -243,16 +243,32 @@ pub async fn run_app<B: Backend>(
                     }
                 }
                 InputMode::Editing => {
-                    let popup_area = centered_rect(60, 10, body_chunk);
+                    let popup_width_percentage = 60;
+                    let popup_width = (size.width * popup_width_percentage / 100).saturating_sub(2);
+
+                    let lines_required = calculate_wrapped_lines(&app.new_task_title, popup_width);
+
+                    let min_required_height = 1;
+
+                    let required_height = std::cmp::max(lines_required as u16, min_required_height);
+
+                    let popup_height = required_height + 2;
+
+                    let max_popup_height = size.height - 2;
+                    let popup_height = std::cmp::min(popup_height, max_popup_height);
+
+                    let popup_area =
+                        centered_rect_absolute(popup_width + 2, popup_height, body_chunk);
 
                     let popup_block = Block::default()
-                        .title("Enter New Task Title (Press Enter to Submit)")
+                        .title("Enter New Task (Press Enter to Submit)")
                         .borders(Borders::ALL)
                         .style(Style::default().fg(Color::Green));
 
-                    let input = Paragraph::new(Text::from(app.new_task_title.as_str()))
+                    let input = Paragraph::new(app.new_task_title.as_str())
                         .style(Style::default().fg(Color::White))
-                        .block(popup_block);
+                        .block(popup_block)
+                        .wrap(Wrap { trim: false });
 
                     f.render_widget(Clear, popup_area);
                     f.render_widget(input, popup_area);
@@ -278,4 +294,13 @@ pub async fn run_app<B: Backend>(
             }
         }
     }
+}
+
+fn calculate_wrapped_lines(text: &str, max_width: u16) -> usize {
+    let mut line_count = 0;
+    for line in text.lines() {
+        let line_width = line.chars().count() as u16;
+        line_count += ((line_width + max_width - 1) / max_width) as usize;
+    }
+    line_count
 }
