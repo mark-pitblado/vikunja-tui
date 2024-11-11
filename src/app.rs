@@ -10,7 +10,9 @@ pub struct App {
     pub state: ListState,
     pub task_detail: Option<TaskDetail>,
     pub input_mode: InputMode,
+    pub active_input: ActiveInput,
     pub new_task_title: String,
+    pub new_task_description: String,
     pub page: usize,
     pub show_done_tasks: bool,
 }
@@ -18,6 +20,12 @@ pub struct App {
 pub enum InputMode {
     Normal,
     Editing,
+    Insert,
+}
+#[derive(PartialEq)]
+pub enum ActiveInput {
+    Title,
+    Description,
 }
 
 impl App {
@@ -33,7 +41,9 @@ impl App {
             state,
             task_detail: None,
             input_mode: InputMode::Normal,
+            active_input: ActiveInput::Title,
             new_task_title: String::new(),
+            new_task_description: String::new(),
             page: 1,
             show_done_tasks: false,
         }
@@ -139,6 +149,8 @@ impl App {
                 KeyCode::Char('a') => {
                     self.input_mode = InputMode::Editing;
                     self.new_task_title.clear();
+                    self.new_task_description.clear();
+                    self.active_input = ActiveInput::Title;
                 }
                 KeyCode::Enter => {
                     if let Err(err) = self.select_task(instance_url, api_key).await {
@@ -147,47 +159,72 @@ impl App {
                 }
                 _ => {}
             },
-            InputMode::Editing => {
-                match key.code {
-                    KeyCode::Enter => {
-                        if !self.new_task_title.trim().is_empty() {
-                            let parsed_task = parse_task_input(&self.new_task_title);
 
-                            if let Err(err) = create_new_task(
-                                instance_url,
-                                api_key,
-                                &parsed_task.title,
-                                parsed_task.description.as_deref(),
-                                parsed_task.priority,
-                            )
-                            .await
-                            {
-                                eprintln!("Error creating task: {}", err);
-                            } else {
-                                // Refresh the task list
-                                if let Ok(all_tasks) =
-                                    fetch_tasks(instance_url, api_key, self.page).await
-                                {
-                                    self.tasks =
-                                        all_tasks.into_iter().filter(|task| !task.done).collect();
-                                    self.state.select(Some(0));
-                                }
-                            }
+            InputMode::Editing => match key.code {
+                KeyCode::Char('i') => {
+                    self.input_mode = InputMode::Insert;
+                }
+                KeyCode::Tab => {
+                    self.active_input = match self.active_input {
+                        ActiveInput::Title => ActiveInput::Description,
+                        ActiveInput::Description => ActiveInput::Title,
+                    };
+                }
+                KeyCode::Enter => {
+                    if self.new_task_title.trim().is_empty() {
+                        eprintln!("Task title cannot be empty.");
+                    } else {
+                        let parsed_task = parse_task_input(&self.new_task_title);
+
+                        let description = if self.new_task_description.trim().is_empty() {
+                            None
+                        } else {
+                            Some(self.new_task_description.as_str())
+                        };
+
+                        if let Err(err) = create_new_task(
+                            instance_url,
+                            api_key,
+                            &parsed_task.title,
+                            description,
+                            parsed_task.priority,
+                        )
+                        .await
+                        {
+                            eprintln!("Error creating new task: {}", err);
+                        } else if let Err(err) = self.refresh_tasks(instance_url, api_key).await {
+                            eprintln!("Error fetching tasks: {}", err);
                         }
+                        self.new_task_title.clear();
+                        self.new_task_description.clear();
                         self.input_mode = InputMode::Normal;
                     }
-                    KeyCode::Char(c) => {
-                        self.new_task_title.push(c); // Handle character input
-                    }
-                    KeyCode::Backspace => {
-                        self.new_task_title.pop(); // Handle backspace
-                    }
-                    KeyCode::Esc => {
-                        self.input_mode = InputMode::Normal; // Exit editing mode
-                    }
-                    _ => {}
                 }
-            }
+                KeyCode::Esc => {
+                    self.new_task_title.clear();
+                    self.new_task_description.clear();
+                    self.input_mode = InputMode::Normal;
+                }
+                _ => {}
+            },
+            InputMode::Insert => match key.code {
+                KeyCode::Char(c) => match self.active_input {
+                    ActiveInput::Title => self.new_task_title.push(c),
+                    ActiveInput::Description => self.new_task_description.push(c),
+                },
+                KeyCode::Backspace => match self.active_input {
+                    ActiveInput::Title => {
+                        self.new_task_title.pop();
+                    }
+                    ActiveInput::Description => {
+                        self.new_task_description.pop();
+                    }
+                },
+                KeyCode::Esc => {
+                    self.input_mode = InputMode::Editing;
+                }
+                _ => {}
+            },
         }
         Ok(false)
     }

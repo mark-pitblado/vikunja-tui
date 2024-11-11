@@ -2,6 +2,10 @@
 name = "vikunja-tui"
 version = "0.1.0"
 edition = "2021"
+license = "MIT"
+description = "A terminal application to manage tasks in vikunja"
+repository = "https://github.com/mark-pitblado/vikunja-tui"
+readme = "README.md"
 
 [dependencies]
 regex = "1"
