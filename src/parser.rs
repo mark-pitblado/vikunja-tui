@@ -22,7 +22,7 @@ pub fn parse_task_input(input: &str) -> ParsedTask {
         }
     }
 
-    let title = priority_re.replace_all(&input, "").to_string();
+    let title = priority_re.replace_all(input, "").into_owned();
 
     let title = Regex::new(r"\s+")
         .unwrap()
