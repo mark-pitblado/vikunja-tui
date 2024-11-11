@@ -1,6 +1,6 @@
 use crate::app::{ActiveInput, App, InputMode};
 use ansi_parser::{AnsiParser, Output};
-use crossterm::event::{self, Event as CEvent, KeyCode};
+use crossterm::event::{self, Event as CEvent};
 use ratatui::{
     backend::Backend,
     layout::{Alignment, Constraint, Direction, Layout, Margin, Rect},
@@ -63,7 +63,18 @@ fn get_legend(input_mode: &InputMode) -> Text<'static> {
         InputMode::Normal => Text::from(Line::from(vec![
             Span::styled(" q ", Style::default().fg(Color::Red)),
             Span::raw(": Quit "),
-            // ... other keys ...
+            Span::styled(" j ", Style::default().fg(Color::Red)),
+            Span::raw(": Down "),
+            Span::styled(" k ", Style::default().fg(Color::Red)),
+            Span::raw(": Up "),
+            Span::styled(" n ", Style::default().fg(Color::Red)),
+            Span::raw(": Next Page "),
+            Span::styled(" p ", Style::default().fg(Color::Red)),
+            Span::raw(": Previous Page "),
+            Span::styled(" t ", Style::default().fg(Color::Red)),
+            Span::raw(": Toggle Done "),
+            Span::styled(" Enter ", Style::default().fg(Color::Red)),
+            Span::raw(": View Details "),
             Span::styled(" a ", Style::default().fg(Color::Red)),
             Span::raw(": Add Task "),
         ])),
