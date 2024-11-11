@@ -4,6 +4,12 @@
 
 This is a simple terminal user interface for [vikunja](https://vikunja.io). The purpose is to allow users to manage tasks from the terminal, using their own API key. This project is not managed or affiliated with the Vikunja team.
 
+## Installation
+
+```
+cargo install vikunja-tui
+```
+
 ## Setup
 
 Place the following two values in a `.toml` file within your configuration files under the `vikunja-tui` directory. The instance url should not contain `api/v1`, just the base url for your instance. The api key just needs read and write access to tasks.
