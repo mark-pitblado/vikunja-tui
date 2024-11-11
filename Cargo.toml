@@ -6,6 +6,9 @@ license = "MIT"
 description = "A terminal application to manage tasks in vikunja"
 repository = "https://github.com/mark-pitblado/vikunja-tui"
 readme = "README.md"
+exclude = [
+".github/*"
+]
 
 [dependencies]
 regex = "1"
