@@ -11,9 +11,6 @@ pub struct Task {
 // TaskDetail struct with description
 #[derive(Deserialize, Debug)]
 pub struct TaskDetail {
-    pub id: u64,
-    pub title: String,
-    pub done: bool,
     pub due_date: Option<String>,
     pub labels: Option<Vec<Label>>,
     pub priority: Option<i32>,
@@ -23,6 +20,5 @@ pub struct TaskDetail {
 // Label struct
 #[derive(Deserialize, Debug)]
 pub struct Label {
-    pub id: u64,
     pub title: String,
 }
