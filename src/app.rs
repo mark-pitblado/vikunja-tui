@@ -192,10 +192,8 @@ impl App {
                         .await
                         {
                             eprintln!("Error creating new task: {}", err);
-                        } else {
-                            if let Err(err) = self.refresh_tasks(instance_url, api_key).await {
-                                eprintln!("Error fetching tasks: {}", err);
-                            }
+                        } else if let Err(err) = self.refresh_tasks(instance_url, api_key).await {
+                            eprintln!("Error fetching tasks: {}", err);
                         }
                         self.new_task_title.clear();
                         self.new_task_description.clear();
