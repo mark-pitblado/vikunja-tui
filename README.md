@@ -24,7 +24,7 @@ api_key = "<your-key-here>"
 - Add tasks
 	- Title
 	- Priority, via ![1-5] (vikunja quick add magic syntax)
-	- Description, via {} in the add task flow
+	- Description, via a seperate input box during task creation
 
 ## Roadmap
 
