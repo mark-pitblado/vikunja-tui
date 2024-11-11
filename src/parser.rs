@@ -43,7 +43,6 @@ mod tests {
         let expected = ParsedTask {
             title: "Update software documentation".to_string(),
             priority: Some(4),
-            description: None,
         };
         let result = parse_task_input(input);
         assert_eq!(result, expected);
@@ -55,7 +54,6 @@ mod tests {
         let expected = ParsedTask {
             title: "Fix bugs in the code".to_string(),
             priority: Some(2),
-            description: None,
         };
         let result = parse_task_input(input);
         assert_eq!(result, expected);
@@ -67,7 +65,6 @@ mod tests {
         let expected = ParsedTask {
             title: "Write tests for the parser".to_string(),
             priority: Some(3),
-            description: None,
         };
         let result = parse_task_input(input);
         assert_eq!(result, expected);
@@ -79,7 +76,6 @@ mod tests {
         let expected = ParsedTask {
             title: "Deploy to production".to_string(),
             priority: Some(5),
-            description: None,
         };
         let result = parse_task_input(input);
         assert_eq!(result, expected);
@@ -91,7 +87,6 @@ mod tests {
         let expected = ParsedTask {
             title: "Prepare presentation slides".to_string(),
             priority: Some(2),
-            description: None,
         };
         let result = parse_task_input(input);
         assert_eq!(result, expected);
@@ -103,7 +98,6 @@ mod tests {
         let expected = ParsedTask {
             title: "Organize team building event".to_string(),
             priority: Some(1),
-            description: None,
         };
         let result = parse_task_input(input);
         assert_eq!(result, expected);
@@ -115,7 +109,6 @@ mod tests {
         let expected = ParsedTask {
             title: "Check logs immediately".to_string(),
             priority: None,
-            description: None,
         };
         let result = parse_task_input(input);
         assert_eq!(result, expected);
