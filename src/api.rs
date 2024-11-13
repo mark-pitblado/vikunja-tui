@@ -1,4 +1,5 @@
 use crate::models::{Task, TaskDetail};
+use chrono::{DateTime, NaiveDateTime, SecondsFormat, Utc};
 use reqwest::Client;
 use serde_json::json;
 use std::error::Error;
@@ -51,6 +52,7 @@ pub async fn create_new_task(
     task_title: &str,
     description: Option<&str>,
     priority: Option<u8>,
+    due_date: Option<NaiveDateTime>,
 ) -> Result<(), Box<dyn Error>> {
     let client = Client::new();
     let url = format!("{}/api/v1/projects/1/tasks", instance_url);
@@ -67,6 +69,14 @@ pub async fn create_new_task(
         task_data["priority"] = json!(priority_value);
     }
 
+    if let Some(datetime) = due_date {
+        // Convert NaiveDateTime to DateTime<Utc>
+        let datetime_utc = DateTime::<Utc>::from_utc(datetime, Utc);
+        // Format the datetime including timezone offset as 'Z'
+        let datetime_str = datetime_utc.to_rfc3339_opts(SecondsFormat::Secs, true);
+        task_data["due_date"] = json!(datetime_str);
+    }
+
     let res = client
         .put(&url)
         .header("Authorization", format!("Bearer {}", api_key))
@@ -78,6 +88,6 @@ pub async fn create_new_task(
         Ok(())
     } else {
         let error_text = res.text().await?;
-        Err(format!("Error creating task: {}", error_text).into())
+        Err(format!("API Error: {}", error_text).into())
     }
 }

@@ -15,6 +15,7 @@ pub struct App {
     pub new_task_description: String,
     pub page: usize,
     pub show_done_tasks: bool,
+    pub error_message: Option<String>,
 }
 
 pub enum InputMode {
@@ -46,6 +47,7 @@ impl App {
             new_task_description: String::new(),
             page: 1,
             show_done_tasks: false,
+            error_message: None,
         }
     }
 
@@ -172,32 +174,44 @@ impl App {
                 }
                 KeyCode::Enter => {
                     if self.new_task_title.trim().is_empty() {
-                        eprintln!("Task title cannot be empty.");
+                        self.error_message = Some("Task title cannot be empty.".to_string());
                     } else {
-                        let parsed_task = parse_task_input(&self.new_task_title);
+                        match parse_task_input(&self.new_task_title) {
+                            Ok(parsed_task) => {
+                                let description = if self.new_task_description.trim().is_empty() {
+                                    None
+                                } else {
+                                    Some(self.new_task_description.as_str())
+                                };
 
-                        let description = if self.new_task_description.trim().is_empty() {
-                            None
-                        } else {
-                            Some(self.new_task_description.as_str())
-                        };
-
-                        if let Err(err) = create_new_task(
-                            instance_url,
-                            api_key,
-                            &parsed_task.title,
-                            description,
-                            parsed_task.priority,
-                        )
-                        .await
-                        {
-                            eprintln!("Error creating new task: {}", err);
-                        } else if let Err(err) = self.refresh_tasks(instance_url, api_key).await {
-                            eprintln!("Error fetching tasks: {}", err);
+                                if let Err(err) = create_new_task(
+                                    instance_url,
+                                    api_key,
+                                    &parsed_task.title,
+                                    description,
+                                    parsed_task.priority,
+                                    parsed_task.due_date,
+                                )
+                                .await
+                                {
+                                    self.error_message =
+                                        Some(format!("Error creating new task: {}", err));
+                                } else if let Err(err) =
+                                    self.refresh_tasks(instance_url, api_key).await
+                                {
+                                    self.error_message =
+                                        Some(format!("Error fetching tasks: {}", err));
+                                } else {
+                                    // Clear input and return to normal mode
+                                    self.new_task_title.clear();
+                                    self.new_task_description.clear();
+                                    self.input_mode = InputMode::Normal;
+                                }
+                            }
+                            Err(parse_error) => {
+                                self.error_message = Some(format!("Input Error: {}", parse_error));
+                            }
                         }
-                        self.new_task_title.clear();
-                        self.new_task_description.clear();
-                        self.input_mode = InputMode::Normal;
                     }
                 }
                 KeyCode::Esc => {
