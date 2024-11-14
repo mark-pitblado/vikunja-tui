@@ -30,6 +30,7 @@ api_key = "<your-key-here>"
 - Add tasks
 	- Title
 	- Priority, via ![1-5] (vikunja quick add magic syntax)
+	- Due date,  via due:YYYY-MM-DD. No time is needed/supported at present, it will assume UTC 23:59:59.
 	- Description, via a seperate input box during task creation
 
 ## Roadmap

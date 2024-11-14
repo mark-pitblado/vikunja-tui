@@ -248,6 +248,25 @@ pub async fn run_app<B: Backend>(
                             .wrap(Wrap { trim: true });
                         f.render_widget(paragraph, chunks[1]);
                     }
+                    // Render the error message if there is one
+                    if let Some(ref msg) = app.error_message {
+                        // Create a centered rectangle for the popup
+                        let error_area = centered_rect_absolute(60, 5, size);
+                        let error_block = Block::default()
+                            .borders(Borders::ALL)
+                            .title("Error")
+                            .style(Style::default().fg(Color::Red));
+
+                        let error_paragraph = Paragraph::new(msg.as_str())
+                            .style(Style::default().fg(Color::White))
+                            .block(error_block)
+                            .alignment(Alignment::Center)
+                            .wrap(Wrap { trim: true });
+
+                        // Clear the area and render the popup
+                        f.render_widget(Clear, error_area); // Clear the area first
+                        f.render_widget(error_paragraph, error_area);
+                    }
                 }
                 InputMode::Editing | InputMode::Insert => {
                     let popup_width_percentage = 60u16;
